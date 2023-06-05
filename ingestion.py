@@ -30,7 +30,9 @@ def ingest_docs() -> None:
 
     for doc in documents:
         old_path = doc.metadata["source"]
-        new_url = old_path.replace("langchain-docs", "https:/")
+        new_url = old_path.replace("langchain-docs", "https://")
+        new_url = new_url.replace("\\", "/")
+        new_url = new_url.replace("///", "//")
         doc.metadata.update({"source": new_url})
 
     print(f"Going to insert {len(documents)} to Pinecone")
