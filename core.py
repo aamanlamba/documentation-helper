@@ -7,7 +7,7 @@ from langchain.chains import ConversationalRetrievalChain
 import pinecone
 import os
 from dotenv import load_dotenv
-from typing import Any
+from typing import Any, Dict, List
 
 from consts import INDEX_NAME
 
@@ -26,18 +26,31 @@ def run_llm(query: str) -> Any:
     chat = ChatOpenAI(verbose=True, temperature=0)
     ### Retrieval QA Chain example
     qa = RetrievalQA.from_chain_type(
-            llm=chat,
-            chain_type="stuff",
-            retriever=docsearch.as_retriever(),
-            return_source_documents=True,
-            verbose=True,
+        llm=chat,
+        chain_type="stuff",
+        retriever=docsearch.as_retriever(),
+        return_source_documents=True,
+        verbose=True,
     )
     qa2 = ConversationalRetrievalChain.from_llm(
         llm=chat, retriever=docsearch.as_retriever(), return_source_documents=True
     )
     return qa({"query": query})
-    #return qa({"query": query, "chat_history": chat_history})
+    # return qa({"query": query, "chat_history": chat_history})
 
 
-if __name__ == "__main__":
-    print(run_llm(query="What is RetrievalQA Chain?"))
+def run_llm_with_history(query: str, chat_history: List[Dict[str, Any]] = []):
+    embeddings = OpenAIEmbeddings(openai_api_key=os.environ["OPENAI_API_KEY"])
+    docsearch = Pinecone.from_existing_index(
+        embedding=embeddings,
+        index_name=INDEX_NAME,
+    )
+    chat = ChatOpenAI(
+        verbose=True,
+        temperature=0,
+    )
+
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=chat, retriever=docsearch.as_retriever(), return_source_documents=True
+    )
+    return qa({"question": query, "chat_history": chat_history})
