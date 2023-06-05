@@ -35,7 +35,7 @@ def ingest_docs() -> None:
 
     print(f"Going to insert {len(documents)} to Pinecone")
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY"))
-    Pinecone.from_documents(documents[3969:], embeddings, index_name=INDEX_NAME)
+    Pinecone.from_documents(documents, embeddings, index_name=INDEX_NAME)
     print("****** Added to Pinecone vectorstore vectors")
 
 
